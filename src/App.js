@@ -1,8 +1,10 @@
 import React, { Component, Fragment } from 'react'
 import './css/App.css'
-import fire from './helpers/fire'
+import ajaxCall from './helpers/ajax-call'
 import 'react-dropdown/style.css'
 import { CurrencyBlock } from './components'
+
+const baseURL = 'https://api.exchangeratesapi.io/latest'
 class App extends Component{
   constructor(props){
     super(props)
@@ -18,14 +20,13 @@ class App extends Component{
   }
 
   componentWillMount(){
-    fire('CURRENCIES_GET', this.setData)
+    ajaxCall(baseURL, this.setData)
   }
 
   componentWillUpdate( prevProps, prevState){
     const { fromCurrency, toCurrency } = prevState
     if( fromCurrency !== this.state.fromCurrency || toCurrency !== this.state.toCurrency ){
-      const payload = { fromCurrency, toCurrency }
-      fire('CHANGE_CURRENCIES_GET', this.changeCurrency, payload)
+      ajaxCall(`${ baseURL }?base=${ fromCurrency }&symbols=${ toCurrency }`, this.changeCurrency)
     }
   }
 
@@ -53,51 +54,45 @@ class App extends Component{
       this.setState({ displayErrorMessage: true })
     } else {
       let isFromCurrency
-      name === 'fromCurrencyAmount' ? isFromCurrency = true : isFromCurrency = false
+      name === 'fromCurrency' ? isFromCurrency = true : isFromCurrency = false
       this.setState({ amount, isFromCurrency, displayErrorMessage: false })
     }
   }
 
   render(){
     const { currencyValues, fromCurrency, toCurrency, exchangeRate, amount, isFromCurrency, displayErrorMessage } = this.state
-    let fromCurrencyAmount, toCurrencyAmount
+    let fromAmount, toAmount
     if( isFromCurrency ){
-      fromCurrencyAmount = amount
-      toCurrencyAmount = Number((amount * exchangeRate).toFixed(2))
+      fromAmount = amount
+      toAmount = Number((amount * exchangeRate).toFixed(2))
     } else {
-      fromCurrencyAmount = Number((amount / exchangeRate).toFixed(2))
-      toCurrencyAmount = amount
+      fromAmount = Number((amount / exchangeRate).toFixed(2))
+      toAmount = amount
     }
     return (
       <Fragment>
         { displayErrorMessage 
-          ? <p className="error-label">This converter only accepts numbers!</p>
+          ? <p className="error-label">Please input a number :)</p>
           : null
         } 
-        <div className="d-flex align-center container">
-          <div className="d-flex flex-column b-white currency-container border-left">
-            <p className="bold pb-20">You have</p>
+        <div className="container">
+          <div className="d-flex align-center justify-center pr-20 pl-20">
             <CurrencyBlock
-              amountType="fromCurrencyAmount"
-              amountValue={ fromCurrencyAmount }
               dropdownType="fromCurrency"
+              amountValue={ fromAmount }
               dropdownValue={ fromCurrency }
               onChange={ this.onChangeAmount }
               dropdownOptions={ currencyValues }
               onSelectCurrency={ this.onSelectCurrency }
             />
-          </div>
-          <div className="d-flex flex-column b-grey currency-container border-right">
-            <p className="bold pb-20">You get</p>
-              <CurrencyBlock
-                amountType="toCurrencyAmount"
-                amountValue={ toCurrencyAmount }
-                dropdownType="toCurrency"
-                dropdownValue={ toCurrency }
-                onChange={ this.onChangeAmount }
-                dropdownOptions={ currencyValues }
-                onSelectCurrency={ this.onSelectCurrency }
-              />
+            <CurrencyBlock
+              dropdownType="toCurrency"
+              amountValue={ toAmount }
+              dropdownValue={ toCurrency }
+              onChange={ this.onChangeAmount }
+              dropdownOptions={ currencyValues }
+              onSelectCurrency={ this.onSelectCurrency }
+            />
           </div>
         </div>
       </Fragment>
