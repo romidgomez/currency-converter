@@ -5,6 +5,7 @@ import 'react-dropdown/style.css'
 import { CurrencyBlock } from './components'
 
 const baseURL = 'https://api.exchangeratesapi.io/latest'
+
 class App extends Component{
   constructor(props){
     super(props)
