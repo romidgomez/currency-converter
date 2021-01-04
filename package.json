@@ -2,6 +2,7 @@
   "name": "currency-converter",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://romidgomez.github.io/currency-converter/public/index.html",
   "dependencies": {
     "@babel/core": "^7.12.10",
     "@testing-library/jest-dom": "^5.11.4",
